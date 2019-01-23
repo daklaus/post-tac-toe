@@ -1,14 +1,19 @@
 %!
-% tic tac toe game in PostScript by Klaus Krapfenbauer
-% execute this script with the linux command `gsx tictactoe.ps`.
+% Post-tac-toe game in PostScript by Klaus Krapfenbauer
+% execute this script with the linux command `gsx post-tac-toe.ps`.
 % You need to have the ghostscript package installed.
 
-% Global constants
-/gameSize 3 def
-/players 2 def
-/banner (tic tac toe by Klaus Krapfenbauer) def
+% TODO (KK): Draw row and column indices for easier input
 
-/cellHeight 120 def
+% Global constants
+/gameHeight 2 def
+/gameWidth 4 def
+/winMarks 3 def
+/players 2 def
+/random false def
+/banner (Post-tac-toe by Klaus Krapfenbauer) def
+
+/cellLength 120 def
 /leftField 40 def
 /fieldTopOffset 40 def
 /margin 10 def
@@ -18,7 +23,8 @@
 /top 72 11 mul margin 2 mul sub def
 /right 72 8.5 mul margin 2 mul sub def
 /topStart top 0 sub def
-/fieldHeight cellHeight gameSize mul def
+/fieldHeight cellLength gameHeight mul def
+/fieldWidth cellLength gameWidth mul def
 /topField topStart fieldTopOffset sub def
 
 /currentPlayer null def
@@ -31,8 +37,9 @@ margin margin translate
   erasepage
   drawfield
 
-  /state [ gameSize { [ gameSize {0} repeat ] } repeat ] def
+  /state [ gameWidth { [ gameHeight {0} repeat ] } repeat ] def
   /currentPlayer 1 def
+  % TODO (KK): Choose player randomly if /random is true
 
   () =
   (New game stared) =
@@ -51,31 +58,31 @@ margin margin translate
   newpath
   leftField topField moveto
   0 fieldHeight neg rlineto
-  fieldHeight 0 rlineto
+  fieldWidth 0 rlineto
   0 fieldHeight rlineto
   closepath
   stroke
 
   % Draw grid
   newpath
-  % Horizontal lines
-  1 1 gameSize 1 sub {
+  % Vertical lines
+  1 1 gameWidth 1 sub {
     << >> begin
     /i exch def
 
-    leftField i cellHeight mul add topField moveto
+    leftField i cellLength mul add topField moveto
     0 fieldHeight neg rlineto
 
     end
   } for
 
-  % Vertical lines
-  1 1 gameSize 1 sub {
+  % Horizontal lines
+  1 1 gameHeight 1 sub {
     << >> begin
     /i exch def
 
-    leftField topField i cellHeight mul sub moveto
-    fieldHeight 0 rlineto
+    leftField topField i cellLength mul sub moveto
+    fieldWidth 0 rlineto
 
     end
   } for
@@ -93,9 +100,9 @@ margin margin translate
   /row exch def
   /markIdx exch def
 
-  /cellTop topField row cellHeight mul sub cellPadding sub def
-  /cellLeft leftField col cellHeight mul add cellPadding add def
-  /cellInnerHeight cellHeight cellPadding 2 mul sub def
+  /cellTop topField row cellLength mul sub cellPadding sub def
+  /cellLeft leftField col cellLength mul add cellPadding add def
+  /cellInnerLength cellLength cellPadding 2 mul sub def
 
   3 setlinewidth
 
@@ -104,14 +111,15 @@ margin margin translate
   markIdx 1 eq {
     % Draw an X
     cellLeft cellTop moveto
-    cellInnerHeight cellInnerHeight neg rlineto
-    cellLeft cellInnerHeight add cellTop moveto
-    cellInnerHeight neg cellInnerHeight neg rlineto
+    cellInnerLength cellInnerLength neg rlineto
+    cellLeft cellInnerLength add cellTop moveto
+    cellInnerLength neg cellInnerLength neg rlineto
   } {
     % Draw an O
-    /radius cellInnerHeight 2 div def
+    /radius cellInnerLength 2 div def
     cellLeft radius add  cellTop radius sub  radius  0 360 arc closepath
   } ifelse
+  % TODO (KK): Add more player marks
 
   stroke
 
@@ -126,11 +134,11 @@ margin margin translate
     /row exch def
   
     % Check the input
-    row 0 lt row gameSize ge or {
+    row 0 lt row gameHeight ge or {
       (Row index out of range) =
       stop
     } if
-    col 0 lt col gameSize ge or {
+    col 0 lt col gameWidth ge or {
       (Column index out of range) =
       stop
     } if
@@ -153,6 +161,7 @@ margin margin translate
   
     % Advancing global variables
     /currentPlayer currentPlayer players mod 1 add def
+    % TODO (KK): Choose player randomly if /random is true
     (It's your turn, player ) print currentPlayer 1 string cvs print (!) =
 
   } stopped pop
