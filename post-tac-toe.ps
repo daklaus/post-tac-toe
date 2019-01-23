@@ -1,0 +1,170 @@
+%!
+% tic tac toe game in PostScript by Klaus Krapfenbauer
+% execute this script with the linux command `gsx tictactoe.ps`.
+% You need to have the ghostscript package installed.
+
+% Global constants
+/gameSize 3 def
+/players 2 def
+/banner (tic tac toe by Klaus Krapfenbauer) def
+
+/cellHeight 120 def
+/leftField 40 def
+/fieldTopOffset 40 def
+/margin 10 def
+/cellPadding 20 def
+/bannerFontSize 25 def
+
+/top 72 11 mul margin 2 mul sub def
+/right 72 8.5 mul margin 2 mul sub def
+/topStart top 0 sub def
+/fieldHeight cellHeight gameSize mul def
+/topField topStart fieldTopOffset sub def
+
+/currentPlayer null def
+
+% field scale and starting point
+margin margin translate
+
+/new {
+  0 0 0 setrgbcolor
+  erasepage
+  drawfield
+
+  /state [ gameSize { [ gameSize {0} repeat ] } repeat ] def
+  /currentPlayer 1 def
+
+  () =
+  (New game stared) =
+  (Enter "<row-index> <column-index> i" to insert the first mark. Indices start with 0 at the top left cell. Player 1 starts.) =
+} def
+
+/drawfield {
+  << >> begin
+
+  /Helvetica findfont bannerFontSize scalefont setfont
+  35 topStart bannerFontSize sub moveto
+  banner show
+
+  3 setlinewidth
+  % Draw outer border
+  newpath
+  leftField topField moveto
+  0 fieldHeight neg rlineto
+  fieldHeight 0 rlineto
+  0 fieldHeight rlineto
+  closepath
+  stroke
+
+  % Draw grid
+  newpath
+  % Horizontal lines
+  1 1 gameSize 1 sub {
+    << >> begin
+    /i exch def
+
+    leftField i cellHeight mul add topField moveto
+    0 fieldHeight neg rlineto
+
+    end
+  } for
+
+  % Vertical lines
+  1 1 gameSize 1 sub {
+    << >> begin
+    /i exch def
+
+    leftField topField i cellHeight mul sub moveto
+    fieldHeight 0 rlineto
+
+    end
+  } for
+
+  stroke
+
+  end
+} def
+
+
+/drawMark {
+  << >> begin
+
+  /col exch def
+  /row exch def
+  /markIdx exch def
+
+  /cellTop topField row cellHeight mul sub cellPadding sub def
+  /cellLeft leftField col cellHeight mul add cellPadding add def
+  /cellInnerHeight cellHeight cellPadding 2 mul sub def
+
+  3 setlinewidth
+
+  newpath
+
+  markIdx 1 eq {
+    % Draw an X
+    cellLeft cellTop moveto
+    cellInnerHeight cellInnerHeight neg rlineto
+    cellLeft cellInnerHeight add cellTop moveto
+    cellInnerHeight neg cellInnerHeight neg rlineto
+  } {
+    % Draw an O
+    /radius cellInnerHeight 2 div def
+    cellLeft radius add  cellTop radius sub  radius  0 360 arc closepath
+  } ifelse
+
+  stroke
+
+  end
+} def
+
+/i {
+  {
+    %<< >> begin
+  
+    /col exch def
+    /row exch def
+  
+    % Check the input
+    row 0 lt row gameSize ge or {
+      (Row index out of range) =
+      stop
+    } if
+    col 0 lt col gameSize ge or {
+      (Column index out of range) =
+      stop
+    } if
+  
+    % Check that the field is still empty
+    state col get row get 0 ne {
+      (Cell already marked) =
+      stop
+    } if
+  
+    % Draw the mark on the field
+    currentPlayer row col drawMark
+
+    % Advancing global variables
+    state col get row currentPlayer put
+  
+    % TODO (KK): Check for wins
+  
+    %end
+  
+    % Advancing global variables
+    /currentPlayer currentPlayer players mod 1 add def
+    (It's your turn, player ) print currentPlayer 1 string cvs print (!) =
+
+  } stopped pop
+} def
+
+/main {
+  () =
+  (=======================================================) =
+  banner =
+  (=======================================================) =
+  () =
+  new
+} def
+
+main
