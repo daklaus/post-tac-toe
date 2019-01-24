@@ -26,6 +26,11 @@
 % field scale and starting point
 margin margin translate
 
+% Usage:   - new
+% Returns: -
+%
+% Clears the game field and starts a new game
+%
 /new {
   0 0 0 setrgbcolor
   erasepage
@@ -43,6 +48,11 @@ margin margin translate
   whoseTurnMessage
 } def
 
+% Usage:   <rows> <cols> <winMarks> <players> <random> change
+% Returns: -
+%
+% Sets new game parameters and starts a new game
+%
 /change {
   /random exch def
   /players exch def
@@ -57,6 +67,11 @@ margin margin translate
   
 } def
 
+% Usage:   - drawfield
+% Returns: -
+%
+% Draws the game field onto the page
+%
 /drawfield {
   << >> begin
 
@@ -103,7 +118,11 @@ margin margin translate
   end
 } def
 
-
+% Usage:   <player> <row> <col> drawMark
+% Returns: -
+%
+% Draws the mark for the player <player> to cell at <row> and <col> onto the page
+%
 /drawMark {
   << >> begin
 
@@ -169,6 +188,11 @@ margin margin translate
   end
 } def
 
+% Usage:   <row> <col> i
+% Returns: -
+%
+% Make a turn as the current player to mark the cell at <row> and <col>
+%
 /i {
   {
     /col exch def
@@ -213,7 +237,14 @@ margin margin translate
   } stopped pop
 } def
 
+% Usage:   <player> <row> <col> whoWon
+% Returns: <player> if the player won
+%          0        if the move ended the game in a draw
+%          -1       if nobody won yet
+%
+% Check who won based on the current move of <player> to mark the cell at <row> and <col>.
 % Algorithm loosly based on https://stackoverflow.com/a/1058804
+%
 /whoWon {
   << >> begin
   {
@@ -269,6 +300,12 @@ margin margin translate
   end
 } def
 
+% Usage:   <row> <col> isInBounds
+% Returns: true   if the cell is within the field
+%          false  otherwise
+%
+% Check if the cell is within the game field
+%
 /isInBounds {
   << >> begin
 
@@ -283,6 +320,13 @@ margin margin translate
   end
 } def
 
+% Usage:   <row> <col> <counter-name-literal> countMark
+% Returns: -
+%
+% Increments the counter variable identified by the name <counter-name-literal>
+% if the game cell is marked by the player (specified as /player variable).
+% Otherwise resets the counter variable to 0.
+%
 /countMark {
   << >> begin
 
@@ -304,6 +348,11 @@ margin margin translate
   end
 } def
 
+% Usage:   - setNextPlayer
+% Returns: -
+%
+% Sets the /currentPlayer variable to the player who's next on turn.
+%
 /setNextPlayer {
   random {
     % Randomly choose next player
@@ -314,6 +363,12 @@ margin margin translate
   } ifelse
 } def
 
+% Usage:   <winner> announceWinner
+% Returns: -
+%
+% Print's a gratulation message for the player <winner> or reports a
+% draw if <winner> is 0.
+%
 /announceWinner {
   << >> begin
 
@@ -332,10 +387,22 @@ margin margin translate
   end
 } def
 
+% Usage:   - whoseTurnMessage
+% Returns: -
+%
+% Print's a message to determine which player is on turn determined
+% by the /currentPlayer variable.
+%
 /whoseTurnMessage {
   (It's your turn, player ) print currentPlayer 2 string cvs print (!) =
 } def
 
+% Usage:   - main
+% Returns: -
+%
+% Main method of the game. Prints the game banner, greeting and help message
+% and starts a new classic tic-tac-toe game.
+%
 /main {
   () =
   (=======================================================) =
