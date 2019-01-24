@@ -119,18 +119,50 @@ margin margin translate
 
   newpath
 
-  markIdx 1 eq {
+  % switch markIdx
+  markIdx
+  dup 1 eq {
+    pop 0
     % Draw an X
     cellLeft cellTop moveto
     cellInnerLength cellInnerLength neg rlineto
     cellLeft cellInnerLength add cellTop moveto
     cellInnerLength neg cellInnerLength neg rlineto
-  } {
+  } if
+  dup 2 eq {
+    pop 0
     % Draw an O
     /radius cellInnerLength 2 div def
     cellLeft radius add  cellTop radius sub  radius  0 360 arc closepath
-  } ifelse
-  % TODO (KK): Add more player marks
+  } if
+  dup 3 eq {
+    pop 0
+    % Draw a triangle
+    cellLeft cellInnerLength 2 div add cellTop moveto
+    cellLeft cellTop cellInnerLength sub lineto
+    cellInnerLength 0 rlineto
+    closepath
+  } if
+  dup 4 eq {
+    pop 0
+    % Draw a square
+    cellLeft cellTop moveto
+    0 cellInnerLength neg rlineto
+    cellInnerLength 0 rlineto
+    0 cellInnerLength rlineto
+    closepath
+  } if
+  dup 5 eq {
+    pop 0
+    % Draw a Y
+    cellLeft cellTop moveto
+    cellInnerLength 2 div cellInnerLength neg 2 div rlineto
+    0 cellInnerLength neg 2 div rlineto
+    0 cellInnerLength 2 div rmoveto
+    cellInnerLength 2 div cellInnerLength 2 div rlineto
+  } if
+  pop
+  % TODO (KK): Add even more player marks
 
   stroke
 
