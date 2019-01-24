@@ -8,12 +8,12 @@
 % Global constants
 /banner (Post-tac-toe by Klaus Krapfenbauer) def
 
-/cellLength 80 def
+/cellLength 60 def
 /leftField 40 def
 /fieldTopOffset 40 def
 /margin 10 def
 /cellPadding 10 def
-/bannerFontSize 25 def
+/bannerFontSize 20 def
 
 /top 72 11 mul margin 2 mul sub def
 /right 72 8.5 mul margin 2 mul sub def
@@ -32,13 +32,14 @@ margin margin translate
   drawfield
 
   /state [ gameWidth { [ gameHeight {0} repeat ] } repeat ] def
-  /currentPlayer 1 def
-  % TODO (KK): Choose player randomly if /random is true
   /moveCount 0 def
 
   () =
   (New game started) =
   (Enter "<row-index> <column-index> i" to insert the first mark. Indices start with 0 at the top left cell.) =
+
+  /currentPlayer 0 def
+  setNextPlayer
   whoseTurnMessage
 } def
 
@@ -173,8 +174,7 @@ margin margin translate
     } if
   
     % Advancing global variables
-    /currentPlayer currentPlayer players mod 1 add def
-    % TODO (KK): Choose player randomly if /random is true
+    setNextPlayer
 
     whoseTurnMessage
 
@@ -270,6 +270,16 @@ margin margin translate
   } if
   
   end
+} def
+
+/setNextPlayer {
+  random {
+    % Randomly choose next player
+    /currentPlayer rand players mod 1 add def
+  } {
+    % Choose next player cyclic
+    /currentPlayer currentPlayer players mod 1 add def
+  } ifelse
 } def
 
 /announceWinner {
