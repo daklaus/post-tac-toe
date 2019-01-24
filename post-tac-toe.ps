@@ -6,28 +6,22 @@
 % TODO (KK): Draw row and column indices for easier input
 
 % Global constants
-/gameHeight 2 def
-/gameWidth 4 def
-/winMarks 3 def
-/players 2 def
-/random false def
 /banner (Post-tac-toe by Klaus Krapfenbauer) def
 
-/cellLength 120 def
+/cellLength 80 def
 /leftField 40 def
 /fieldTopOffset 40 def
 /margin 10 def
-/cellPadding 20 def
+/cellPadding 10 def
 /bannerFontSize 25 def
 
 /top 72 11 mul margin 2 mul sub def
 /right 72 8.5 mul margin 2 mul sub def
 /topStart top 0 sub def
-/fieldHeight cellLength gameHeight mul def
-/fieldWidth cellLength gameWidth mul def
 /topField topStart fieldTopOffset sub def
 
 /currentPlayer null def
+/moveCount null def
 
 % field scale and starting point
 margin margin translate
@@ -40,10 +34,26 @@ margin margin translate
   /state [ gameWidth { [ gameHeight {0} repeat ] } repeat ] def
   /currentPlayer 1 def
   % TODO (KK): Choose player randomly if /random is true
+  /moveCount 0 def
 
   () =
-  (New game stared) =
-  (Enter "<row-index> <column-index> i" to insert the first mark. Indices start with 0 at the top left cell. Player 1 starts.) =
+  (New game started) =
+  (Enter "<row-index> <column-index> i" to insert the first mark. Indices start with 0 at the top left cell.) =
+  whoseTurnMessage
+} def
+
+/change {
+  /random exch def
+  /players exch def
+  /winMarks exch def
+  /gameWidth exch def
+  /gameHeight exch def
+
+  /fieldHeight cellLength gameHeight mul def
+  /fieldWidth cellLength gameWidth mul def
+
+  new
+  
 } def
 
 /drawfield {
@@ -128,8 +138,6 @@ margin margin translate
 
 /i {
   {
-    %<< >> begin
-  
     /col exch def
     /row exch def
   
@@ -154,17 +162,136 @@ margin margin translate
 
     % Advancing global variables
     state col get row currentPlayer put
+    /moveCount moveCount 1 add def
   
-    % TODO (KK): Check for wins
-  
-    %end
+    % Check for wins
+    /winner currentPlayer row col whoWon def
+    winner 0 ge {
+      % We have a winner, end the game and start a new one
+      winner announceWinner
+      stop
+    } if
   
     % Advancing global variables
     /currentPlayer currentPlayer players mod 1 add def
     % TODO (KK): Choose player randomly if /random is true
-    (It's your turn, player ) print currentPlayer 1 string cvs print (!) =
+
+    whoseTurnMessage
 
   } stopped pop
+} def
+
+% Algorithm loosly based on https://stackoverflow.com/a/1058804
+/whoWon {
+  << >> begin
+  {
+
+    /col exch def
+    /row exch def
+    /player exch def
+
+    /colMarks 0 def
+    /rowMarks 0 def
+    /diagMarks 0 def
+    /rdiagMarks 0 def
+    
+    % From 1 - k to k - 1
+    1 winMarks sub 1 winMarks 1 sub {
+      /i exch def
+
+      % Check row
+      row col i add /colMarks countMark
+
+      % Check column
+      row i add col /rowMarks countMark
+
+      % Check diagonal
+      row i add col i add /diagMarks countMark
+
+      % Check reverse diagonal
+      row i add col i neg add /rdiagMarks countMark
+
+
+      % Check if we already have a winner
+      colMarks winMarks ge
+      rowMarks winMarks ge or
+      diagMarks winMarks ge or
+      rdiagMarks winMarks ge or {
+        % The player won
+        player
+        stop
+      } if
+
+    } for
+
+    % If all fields are filled, it's a draw (represented as player 0)
+    moveCount gameHeight gameWidth mul ge {
+      0
+      stop
+    } if
+
+    % Nobody won so far (represented by player -1)
+    -1
+  
+  } stopped pop
+  end
+} def
+
+/isInBounds {
+  << >> begin
+
+  /col exch def
+  /row exch def
+
+  % Check row index
+  row 0 ge row gameHeight lt and
+  col 0 ge col gameWidth lt and
+  and
+
+  end
+} def
+
+/countMark {
+  << >> begin
+
+  /counterName exch def % Stores the name literal of the global variable to operate on
+  /col exch def
+  /row exch def
+
+  row col isInBounds {
+    state col get row get player eq {
+      % One more mark found in this direction for this player, increase the counter
+      % Indirect counter++
+      counterName counterName load 1 add store
+    } {
+      % Another players mark (or blank field) found, reset mark counter
+      counterName 0 store
+    } ifelse
+  } if
+  
+  end
+} def
+
+/announceWinner {
+  << >> begin
+
+  /winner exch def
+
+  () =
+  winner 0 eq {
+    % It's a draw
+    (It's a draw! :\() =
+  } {
+    (Hey, you have WON player ) print winner 2 string cvs print (! Congratulations!) =
+  } ifelse
+  () =
+  (Enter "new" to start a new game.) =
+
+  end
+} def
+
+/whoseTurnMessage {
+  (It's your turn, player ) print currentPlayer 2 string cvs print (!) =
 } def
 
 /main {
@@ -173,7 +300,16 @@ margin margin translate
   banner =
   (=======================================================) =
   () =
-  new
+  (You can change the game settings by entering "<rows> <cols> <win-number> <player> <random> change") =
+  (where) =
+  (  <rows> is the number of rows of the field) =
+  (  <cols> is the number of columns of the field) =
+  (  <win-number> is the number of marks in a row, column or diagonal a player needs to win the game) =
+  (  <player> is the number of players) =
+  (  <random> can be set to true to determine the next player by a dice roll.) =
+  (The default tic-tac-toe game setting is "3 3 3 2 false") =
+  () =
+  3 3 3 2 false change
 } def
 
 main
